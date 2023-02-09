@@ -166,7 +166,9 @@ const getUsers = async (req, res, next) => {
     return next(error);
   }
 
-  res.status(200).json({ users: users });
+  res
+    .status(200)
+    .json({ users: users.map((user) => user.toObject({ getters: true })) });
 };
 
 const getRefreshToken = async (req, res, next) => {

@@ -37,12 +37,6 @@ export default function App({ Component, pageProps }) {
     getRefreshToken(setUN, setEm, setUID, setTOKEN);
   }, []);
 
-  useEffect(() => {
-    if (Token !== "") {
-      Router.push("/auth/login");
-    }
-  }, []);
-
   const handleLogout = () => {
     /* localStorage.removeItem("loggedInUser");
     setEmail("");

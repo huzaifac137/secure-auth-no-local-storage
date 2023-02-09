@@ -1,13 +1,21 @@
 import authContext from "@/CONTEXT/authContext";
 import useRefreshToken from "@/CUSTOME-HOOKS/useRefreshToken";
-import { Router } from "next/router";
+import Router from "next/router";
 import { useContext, useEffect, useState } from "react";
-import { toast, ToastContainer } from "react-toastify";
+import { toast } from "react-toastify";
 
 export default function Home() {
   const [isLoading, setIsLoading] = useState(false);
   const [users, setUsers] = useState([]);
   const context = useContext(authContext);
+
+  useEffect(() => {
+    if (context.token === "") {
+      Router.push("/auth/login");
+    } else {
+      handleGetUsers();
+    }
+  }, []);
 
   const handleGetUsers = async () => {
     try {
@@ -18,7 +26,7 @@ export default function Home() {
           headers: {
             Authorization: `mjfcmjbl${context.token}`,
           },
-          credentials: "include",
+          // credentials: "include",
         },
       );
 
@@ -27,8 +35,7 @@ export default function Home() {
       if (response.status !== 200) {
         throw new Error(responseData.message);
       }
-
-      toast.success(responseData.message);
+      console.log(responseData.users);
       setUsers(responseData.users);
     } catch (err) {
       toast.error(err.message);
@@ -42,15 +49,17 @@ export default function Home() {
     <>
       <h1>HOME PAGE INDEX.JS</h1>
 
-      <button onClick={handleGetUsers}> GET USERS</button>
-
-      {users !== [] &&
+      {isLoading === true && <h2>LOADING...</h2>}
+      {users.length === 0 ? (
+        <h2>NO users found!</h2>
+      ) : (
         users?.map((user) => (
-          <div key={Math.random()}>
+          <div key={user.id}>
             <h1 style={{ margin: "30px auto" }}>username : {user.username}</h1>
             <h2>email : {user.email} </h2>
           </div>
-        ))}
+        ))
+      )}
     </>
   );
 }
