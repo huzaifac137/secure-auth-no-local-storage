@@ -4,7 +4,6 @@ import { useState } from "react";
 const useRefreshToken = () => {
   const [isLoading, setIsLoading] = useState(false);
 
-  let toastError = "";
   let Token = "";
   const getRefreshToken = async (
     setUsername,
@@ -35,9 +34,8 @@ const useRefreshToken = () => {
       setToken(responseData.token);
       Token = responseData.token;
     } catch (err) {
-      toastError = err.message;
-      setIsLoading(false);
       toast.error(err.message);
+      setIsLoading(false);
       setEmail("");
       setUserId("");
       setUsername("");

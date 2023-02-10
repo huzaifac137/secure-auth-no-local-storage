@@ -177,7 +177,7 @@ const getRefreshToken = async (req, res, next) => {
     refreshToken = req.cookies.jwtkicookie;
 
     if (!refreshToken) {
-      const error = new Error("User not authorized , cookie doesnt exists");
+      const error = new Error("Your session has expired!");
       error.code = 409;
       return next(error);
     }
@@ -214,7 +214,13 @@ const getRefreshToken = async (req, res, next) => {
   res.status(200).json({ username: un, email: em, userId: id, token: token });
 };
 
+const removeCookies = async (req, res, next) => {
+  res.clearCookie("jwtkicookie");
+  res.status(200).json({ message: " User logged out!" });
+};
+
 exports.signup = signup;
 exports.login = login;
 exports.getUsers = getUsers;
 exports.getRefreshToken = getRefreshToken;
+exports.removeCookies = removeCookies;

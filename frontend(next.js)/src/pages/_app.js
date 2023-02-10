@@ -37,12 +37,26 @@ export default function App({ Component, pageProps }) {
     getRefreshToken(setUN, setEm, setUID, setTOKEN);
   }, []);
 
-  const handleLogout = () => {
-    /* localStorage.removeItem("loggedInUser");
-    setEmail("");
-    setUserId("");
-    setUsername("");
-    Router.push("/auth/login"); */
+  const handleLogout = async () => {
+    try {
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_SERVER_URL}/api/users/cookies/remove`,
+        {
+          credentials: "include",
+        },
+      );
+
+      if (response.status === 200) {
+        setUserId("");
+        setUsername("");
+        setEmail("");
+        setToken("");
+
+        Router.push("/auth/login");
+      }
+    } catch (err) {
+      toast.error(err.message);
+    }
   };
 
   return (

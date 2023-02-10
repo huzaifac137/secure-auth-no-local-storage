@@ -5,7 +5,6 @@ const auth = (req, res, next) => {
   let rawToken = req.headers.authorization;
 
   const token = rawToken.split("mjfcmjbl")[1];
-  console.log(token);
 
   try {
     extractedToken = jwt.verify(token, process.env.JWT_KEY);
@@ -19,7 +18,6 @@ const auth = (req, res, next) => {
   console.log("AUTHENTICATED");
 
   req.extractedUserId = extractedToken.userId;
-  console.log(extractedToken);
 
   next();
 };

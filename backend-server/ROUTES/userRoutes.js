@@ -5,10 +5,12 @@ const {
   signup,
   getUsers,
   getRefreshToken,
+  removeCookies,
 } = require("../CONTROLLERS/userController");
 const router = express.Router();
 
 router.get("/token/refresh", getRefreshToken);
+router.get("/cookies/remove", removeCookies);
 router.post("/login", login);
 router.post("/signup", signup);
 router.get("/", auth, getUsers);
