@@ -1,14 +1,9 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
 const express = require("express");
 const auth = require("../CONTROLLERS/AUTH/auth");
-const {
-  login,
-  signup,
-  getUsers,
-  getRefreshToken,
-  removeCookies,
-} = require("../CONTROLLERS/userController");
+const { login, signup, getUsers, getRefreshToken, removeCookies, } = require("../CONTROLLERS/userController");
 const router = express.Router();
-
 router.get("/token/refresh", getRefreshToken);
 router.get("/cookies/remove", removeCookies);
 router.post("/login", login);

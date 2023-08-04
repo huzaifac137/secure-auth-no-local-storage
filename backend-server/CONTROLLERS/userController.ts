@@ -1,66 +1,80 @@
+import { RequestHandler } from "express";
+import { errorException } from "../EXCEPTIONS/errorException";
+import {IUser} from "../MODELS/user";
+import { Secret, SignCallback } from "jsonwebtoken";
+import { Hash } from "crypto";
+ 
+
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
+
 require("dotenv").config;
 const USER = require("../MODELS/user");
 
-const signup = async (req, res, next) => {
-  const { username, email, password } = req.body;
+interface reqBody{
+  username :string , email : string , password :string
+}
+const signup : RequestHandler = async (req, res, next) => {
+  const { username , email , password} : reqBody  = req.body ;
 
   if (!username || !email || !password) {
-    const error = new Error("Please fill all the feilds");
+    const error = new Error("Please fill all the feilds") as errorException;
     error.code = 400;
     return next(error);
   }
 
-  let userNameExists;
+  let userNameExists : IUser | null;
   try {
-    userNameExists = await USER.findOne({ username: username });
+    userNameExists  = await USER.findOne({ username: username });
   } catch {
-    const error = new Error("internal Server Error , something went wrong");
+    const error = new Error("internal Server Error , something went wrong") as errorException;
     error.code = 500;
     return next(error);
   }
 
   if (userNameExists) {
-    const error = new Error("Username already taken");
+    const error = new Error("Username already taken") as errorException;
     error.code = 400;
     return next(error);
   }
 
-  let emailExists;
+  let emailExists : IUser| null;
   try {
-    emailExists = await USER.findOne({ email: email });
+    emailExists  = await USER.findOne({ email: email });
+
   } catch {
-    const error = new Error("internal Server Error , something went wrong");
+    const error = new Error("internal Server Error , something went wrong") as errorException;
     error.code = 500;
     return next(error);
   }
 
   if (emailExists) {
-    const error = new Error("Email already taken");
+    const error = new Error("Email already taken") as errorException;
     error.code = 400;
     return next(error);
   }
 
-  let hashedPassword;
+  let hashedPassword: string;
   try {
     hashedPassword = await bcrypt.hash(password, 12);
   } catch (err) {
-    const error = new Error("internal Server Error , something went wrong");
+    const error = new Error("internal Server Error , something went wrong") as errorException;
     error.code = 500;
     return next(error);
   }
 
-  const user = new USER({
-    username: username,
-    email: email,
-    password: hashedPassword,
+  const user : IUser   = new USER({
+    username : username ,
+    email : email ,
+   password : hashedPassword,
   });
+ 
+  
 
   try {
     await user.save();
   } catch (err) {
-    const error = new Error("internal Server Error , something went wrong");
+    const error = new Error("internal Server Error , something went wrong") as errorException;
     error.code = 500;
     return next(error);
   }
@@ -70,46 +84,48 @@ const signup = async (req, res, next) => {
   });
 };
 
-const login = async (req, res, next) => {
-  const { email, password } = req.body;
+const login :RequestHandler = async (req, res, next) => {
+  const { email , password} : Partial<reqBody> = req.body;
 
-  let emailExists;
+  let emailExists : IUser | null;
   try {
     emailExists = await USER.findOne({ email: email });
   } catch (err) {
-    const error = new Error("ERROR CONNECTING TO SERVER , EMAIL");
+    const error = new Error("ERROR CONNECTING TO SERVER , EMAIL") as errorException;
     error.code = 500;
     return next(error);
   }
 
   if (!emailExists) {
-    const error = new Error("NO SUCH USER EXISTS ON THIS APP");
+    const error = new Error("NO SUCH USER EXISTS ON THIS APP") as errorException;
     error.code = 401;
     return next(error);
   }
 
-  let comparePassword;
+  let comparePassword : boolean;
   try {
-    comparePassword = await bcrypt.compare(password, emailExists.password);
+    comparePassword  = await bcrypt.compare(password, emailExists.password);
   } catch (err) {
-    const error = new Error("ERROR CONNECTING TO SERVER , PASSWORD");
+    const error = new Error("ERROR CONNECTING TO SERVER , PASSWORD") as errorException;
     error.code = 500;
     return next(error);
   }
 
   if (comparePassword !== true) {
-    const error = new Error("PASSWORD IS WRONG");
+    const error = new Error("PASSWORD IS WRONG") as errorException;
     error.code = 401;
     return next(error);
   }
 
-  const refreshToken = jwt.sign(
+
+
+  const refreshToken : SignCallback = jwt.sign(
     {
       userId: emailExists.id,
       email: emailExists.email,
       username: emailExists.username,
     },
-    process.env.JWT_KEY,
+    process.env.JWT_KEY as Secret,
     {
       expiresIn: "7d",
     },
@@ -121,7 +137,7 @@ const login = async (req, res, next) => {
     maxAge: 1000 * 60 * 60 * 24 * 7,
   });
 
-  const token = jwt.sign(
+  const token : SignCallback = jwt.sign(
     {
       username: emailExists.username,
       userId: emailExists.id,
@@ -139,59 +155,59 @@ const login = async (req, res, next) => {
   });
 };
 
-const getUsers = async (req, res, next) => {
+const getUsers : RequestHandler = async (req, res, next) => {
   const userId = req.extractedUserId;
 
-  let user;
+  let user  : IUser;
   try {
     user = await USER.findById(userId);
   } catch (err) {
-    const error = new Error("ERROR CONNECTING TO SERVER , PASSWORD");
+    const error = new Error("ERROR CONNECTING TO SERVER , PASSWORD") as errorException;
     error.code = 500;
     return next(error);
   }
 
   if (!user) {
-    const error = new Error("User not authorized");
+    const error = new Error("User not authorized")  as errorException;
     error.code = 409;
     return next(error);
   }
 
-  let users;
+  let users : IUser[] | [];
   try {
     users = await USER.find({});
   } catch (err) {
-    const error = new Error("ERROR CONNECTING TO SERVER , PASSWORD");
+    const error = new Error("ERROR CONNECTING TO SERVER , PASSWORD")  as errorException;
     error.code = 500;
     return next(error);
   }
 
   res
     .status(200)
-    .json({ users: users.map((user) => user.toObject({ getters: true })) });
+    .json({ users: users.map((user : {toObject : Function}) => user.toObject({ getters: true })) });
 };
 
-const getRefreshToken = async (req, res, next) => {
+const getRefreshToken : RequestHandler = async (req, res, next) => {
   let refreshToken;
   try {
     refreshToken = req.cookies.jwtkicookie;
 
     if (!refreshToken) {
-      const error = new Error("Your session has expired!");
+      const error = new Error("Your session has expired!")  as errorException;
       error.code = 409;
       return next(error);
     }
   } catch (err) {
-    const error = new Error("ERROR CONNECTING TO SERVER , PASSWORD");
+    const error = new Error("ERROR CONNECTING TO SERVER , PASSWORD")  as errorException;
     error.code = 500;
     return next(error);
   }
 
-  let extractedToken;
+  let extractedToken : {username:string , email :string , userId : string};
   try {
     extractedToken = jwt.verify(refreshToken, process.env.JWT_KEY);
   } catch (err) {
-    const error = new Error("ERROR CONNECTING TO SERVER , PASSWORD");
+    const error = new Error("ERROR CONNECTING TO SERVER , PASSWORD")  as errorException;
     error.code = 500;
     return next(error);
   }
@@ -200,21 +216,21 @@ const getRefreshToken = async (req, res, next) => {
   const em = extractedToken.email;
   const id = extractedToken.userId;
 
-  const token = jwt.sign(
+  const token : SignCallback = jwt.sign(
     {
       username: un,
       userId: id,
       email: em,
     },
 
-    process.env.JWT_KEY,
+    process.env.JWT_KEY as Secret,
     { expiresIn: "30m" },
   );
 
   res.status(200).json({ username: un, email: em, userId: id, token: token });
 };
 
-const removeCookies = async (req, res, next) => {
+const removeCookies : RequestHandler = async (req, res, next) => {
   res.clearCookie("jwtkicookie");
   res.status(200).json({ message: " User logged out!" });
 };
