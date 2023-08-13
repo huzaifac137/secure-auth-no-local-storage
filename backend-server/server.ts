@@ -30,11 +30,8 @@ app.use((err : unknown, req : Request, res : Response, next : NextFunction) => {
     return next(err);
   }
 
-  if(err instanceof errorException)
-  {
-    res.status(err.code || 500);
-    res.json({ message: err.message || "SOMETHING WENT WRONG" });
-  }
+    res.status((err as errorException).code || 500);
+    res.json({ message: (err as errorException).message || "SOMETHING WENT WRONG" });
 
 });
 

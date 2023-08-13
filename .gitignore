@@ -1,3 +1,9 @@
 
 frontend(next.js)/.env
 backend-server/.env
+backend-server/DIST/server.js
+backend-server/DIST/CONTROLLERS/AUTH/auth.js
+backend-server/DIST/CONTROLLERS/userController.js
+backend-server/DIST/EXCEPTIONS/errorException.js
+backend-server/DIST/MODELS/user.js
+backend-server/DIST/ROUTES/userRoutes.js
