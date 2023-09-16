@@ -1,0 +1,11 @@
+version: '3.8'
+services:
+  react-app: 
+    container_name: next-app
+    image: next-app-img
+    restart: always
+    build: .
+    ports: 
+      - "3000:3000"
+
+ 
